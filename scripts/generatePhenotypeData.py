@@ -4,16 +4,21 @@ import numpy as np
 
 def generatePhenotype():
     text = [line.strip() for line in open('../data/phenotype_published_raw.tsv')]
+    print len(text)
     phenoTypeIDs = text[0].split('\t')
     plantID = []
     dataTmp = [[] for i in range(len(text)-1)]
+    c = -1
     for line in text[1:]:
+        c+=1
         items = line.split('\t')
         plantID.append(items[0])
-        dataTmp.append(items[1:])
+        dataTmp[c] = items[2:]
+    print dataTmp[0]
 
     n = len(text)-1
     p = len(dataTmp[0])
+    print p
 
     data = np.zeros([n, p])
     for j in range(p):
@@ -32,6 +37,8 @@ def generatePhenotype():
         m = np.mean(values)
         for i in naIndex:
             data[i,j]=m
+
+    print data.shape
 
     np.save('../preprocessedData/phenos', data)
     f1 = open('../final/phenotypeNames.txt', 'w')
