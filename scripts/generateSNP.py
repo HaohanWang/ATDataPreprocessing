@@ -6,12 +6,12 @@ def generateSNPData():
     text = [line.strip() for line in open('../data/call_method_32.b')]
     ids = text[0].split(',')[2:]
     n = len(ids)
-    p = len(text)-1
+    p = len(text)-2
     data = np.zeros([n, p])
     genomeInformation = []
     positionInformation = []
     j = -1
-    for line in text[1:]:
+    for line in text[2:]:
         j += 1
         items = line.split(',')
         genomeInformation.append(items[0])
@@ -37,6 +37,8 @@ def generateSNPData():
 
     print data.shape
     np.save('../preprocessedData/snps', data)
+
+    print len(genomeInformation)
 
     f1 = open('../final/genomeInformation.txt', 'w')
     for i in range(len(genomeInformation)):
