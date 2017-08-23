@@ -1,3 +1,6 @@
 .idea/*
 *.pyc
 data/*
+final/*
+finalWithGoldenStandard/*
+preprocessedData/*
