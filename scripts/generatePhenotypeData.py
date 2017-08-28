@@ -5,7 +5,7 @@ import numpy as np
 def generatePhenotype():
     text = [line.strip() for line in open('../data/phenotype_published_raw.tsv')]
     print len(text)
-    phenoTypeIDs = text[0].split('\t')
+    phenoTypeIDs = text[0].split('\t')[2:]
     plantID = []
     dataTmp = [[] for i in range(len(text)-1)]
     c = -1
@@ -34,7 +34,8 @@ def generatePhenotype():
                     v = 0
                 values.append(v)
                 data[i,j] = v
-        m = np.mean(values)
+        # m = np.mean(values)  # We don't fill in the missing values ourselves
+        m = np.nan
         for i in naIndex:
             data[i,j]=m
 
