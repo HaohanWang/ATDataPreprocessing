@@ -4,41 +4,36 @@ import numpy as np
 
 def getPhenotypeIndex():
     text = [line.strip() for line in open('../final/phenotypeNames.txt')]
-    p2i = {}
+    p2i = {} # pheno2index
+    p2n = {}
     c = -1
     for line in text:
         c += 1
         items = line.split('_')
-        p2i[items[1]] = c
-    return p2i
+        p2i[int(items[0])] = c
+        p2n[int(items[0])] = items[1]
+    return p2i, p2n
 
 def getGoldenStandardPosition():
-    text = [line.strip() for line in open('../data/locations.txt')]
-    n2g = {}
-    name = None
+    cate2pos = {}
+    for i in range(1, 18):
+        text = [line.strip() for line in open('../data/'+str(i)+'.txt')]
+        pos = []
+        for line in text:
+            items = line.split('\t')
+            pos.append((int(items[2]), int(items[0]), int(items[1])))
+        cate2pos[i] = pos
+
+    pheno2Cate={}
+    text = [line.strip() for line in open('../data/phenotypeIndex.txt')]
     for line in text:
-        if line.startswith('***'):
-            items = line.split(',')
-            for i in range(len(items)):
-                if i == 0:
-                    ms = items[i].split(':')
-                    name = ms[0][3:]
-                    c = int(ms[1])
-                    s = int(ms[2].split('-')[0])
-                    e = int(ms[2].split('-')[1])
-                    n2g[name] = [(c, s, e)]
-                else:
-                    ms = items[i].split(':')
-                    try:
-                        int(ms[0]) == 0
-                    except:
-                        print ms[0]
-                    else:
-                        c = int(ms[0])
-                        s = int(ms[1].split('-')[0])
-                        e = int(ms[1].split('-')[1])
-                        n2g[name] = [(c, s, e)]
-    return n2g
+        items = line.split()
+        c = int(items[0][:-1])
+        for p in items[1:]:
+            pheno2Cate[int(p)] = c
+
+    return pheno2Cate, cate2pos
+
 
 def getGenomePosition():
     text = [line.strip() for line in open('../final/genomeInformation.txt')]
@@ -54,8 +49,8 @@ def getGenomePosition():
     return pos
 
 def generateGoldenStandard():
-    p2i = getPhenotypeIndex()
-    n2g = getGoldenStandardPosition()
+    p2i, p2n = getPhenotypeIndex()
+    p2c, c2g = getGoldenStandardPosition()
     pos = getGenomePosition()
 
     phenos = np.load('../final/pheno.npy')
@@ -63,23 +58,21 @@ def generateGoldenStandard():
     ids = []
     gld = []
     names = []
-    for name in n2g:
-        if name in p2i:
-            idx = p2i[name]
+
+    for pheno in p2i:
+        if pheno in p2c:
+            genome = c2g[p2c[pheno]]
             l = []
             for i in range(len(pos)):
                 c, p = pos[i]
-                for (ci, s, e) in n2g[name]:
-                    if c == ci and (s <= p <= e):
+                for (c1, s1, e1) in genome:
+                    if c == c1 and s1 <= p <= e1:
                         l.append(i)
             if len(l) > 0:
-                ids.append(idx)
-                names.append(name)
+                ids.append(p2i[pheno])
+                names.append(p2n[pheno])
                 gld.append(l)
-            else:
-                print name
-        else:
-            print name
+
     ids = np.array(ids)
 
     phe = phenos[:, ids]
